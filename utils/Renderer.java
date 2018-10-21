@@ -7,15 +7,13 @@ import static java.lang.StrictMath.round;
 
 public class Renderer {
 
-    private int color;
     BufferedImage img;
 
     public Renderer(BufferedImage img) {
         this.img = img;
-        color = Color.RED.getRGB();
     }
 
-    private void drawPixel(int x, int y){
+    private void drawPixel(int x, int y, int color){
         if (x < 50 || x > 750) return;
         if (y < 50 || y > 550) return;
         img.setRGB(x,y,color);
@@ -41,7 +39,7 @@ public class Renderer {
 
             for (int x = x1; x < x2; x++) {
                 int y = y1 + (int) (k * (x - x1));
-                drawPixel(x,y);
+                drawPixel(x,y,Color.MAGENTA.getRGB());
             }
 
 
@@ -61,7 +59,7 @@ public class Renderer {
             q = y1 - k*(float) x1;
             for (int y = y1; y < y2; y++) {
                 int x = (int)((y-q)/k);
-                drawPixel(x,y);
+                drawPixel(x,y,Color.MAGENTA.getRGB());
             }
         }
     }
@@ -105,7 +103,7 @@ public class Renderer {
         int max = Math.max(Math.abs(dx), Math.abs(dy));
         for (int l = 0; l <= max ; l++) {
 
-            drawPixel(Math.round(x),Math.round(y));
+            drawPixel(Math.round(x),Math.round(y),Color.RED.getRGB());
             x += G;
             y += H;
         }
