@@ -1,34 +1,42 @@
 package utils;
 
+import drawables.Edge;
+import drawables.Point;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
-
-import static java.lang.StrictMath.round;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Renderer {
 
-    BufferedImage img;
+    private int color;
+    private BufferedImage img;
 
     public Renderer(BufferedImage img) {
         this.img = img;
+        color = Color.RED.getRGB();
     }
 
-    private void drawPixel(int x, int y, int color){
-        if (x < 50 || x > 750) return;
-        if (y < 50 || y > 550) return;
-        img.setRGB(x,y,color);
+    private void drawPixel(int x, int y) {
+        drawPixel(x, y, color);
     }
 
-    public void lineTrivial(int x1, int y1, int x2, int y2){
-        // obecny predpis je: y = kx + q
+    private void drawPixel(int x, int y, int color) {
+        if (x < 0 || x >= 800) return;
+        if (y < 0 || y >= 600) return;
+        img.setRGB(x, y, color);
+    }
+
+    public void lineTrivial(int x1, int y1, int x2, int y2) {
+        // y = kx + q
         int dx = x1 - x2;
         int dy = y1 - y2;
-        float k = (float)dy/ (float) dx;
 
-        if (Math.abs(dx) > Math.abs(dy)){
-            //ridici osa X
-            // q neni potreba, protoze je to pocatecni bod = y1
-            if (x1 > x2){
+        if (Math.abs(dx) > Math.abs(dy)) {
+            // řídící osa X
+            // otočení
+            if (x1 > x2) {
                 int p = x1;
                 x1 = x2;
                 x2 = p;
@@ -37,99 +45,113 @@ public class Renderer {
                 //y2 = p;
             }
 
+            float k = (float) dy / (float) dx;
             for (int x = x1; x < x2; x++) {
                 int y = y1 + (int) (k * (x - x1));
-                drawPixel(x,y,Color.MAGENTA.getRGB());
+                drawPixel(x, y);
             }
-
-
 
         } else {
-            // ridici osa Y
-            float q;
-            if (y1 > y2){
-                int p = x1;
-                x1 = x2;
-                //x2 = p;
-                p = y1;
-                y1 = y2;
-                y2 = p;
-            }
+            // řídící osa Y
 
-            q = y1 - k*(float) x1;
-            for (int y = y1; y < y2; y++) {
-                int x = (int)((y-q)/k);
-                drawPixel(x,y,Color.MAGENTA.getRGB());
-            }
         }
     }
 
-    public void lineDDA(int x1, int y1, int x2, int y2){ //TODO: Do projektu udelat Bresemham a budou Bonus Body (BB) 😛
-        int dx, dy;
-        float x, y, G, H;
+    public void lineDDA(int x1, int y1, int x2, int y2, int color) {
 
-        dx = x2 - x1;
-        dy = y2 - y1;
-        float k = (float)dy/ (float) dx;
+        float k, g, h; //G = PŘÍRŮSTEK X, H = PŘÍRŮSTEK Y
+        int dy = y2 - y1;
+        int dx = x2 - x1;
+        k = dy / (float) dx;
 
-        // urceni ridici osy
-        if (Math.abs(dx) > Math.abs(dy)){
-            G = 1;
-            H = k;
-            if (x1 > x2){
-                int p = x1;
+        //určení řídící osy
+        if (Math.abs(dx) > Math.abs(dy)) {
+            g = 1;
+            h = k;
+            if (x1 > x2) { // prohození
+                int temp = x1;
                 x1 = x2;
-                x2 = p;
-                p = y1;
+                x2 = temp;
+                temp = y1;
                 y1 = y2;
-                y2 = p;
+                y2 = temp;
             }
         } else {
-            G = 1/k;
-            H = 1;
-            //otoceni
-            if (y1 > y2){
-                int p = x1;
+            g = 1 / k;
+            h = 1;
+            if (y1 > y2) { //otočení
+                int temp = x1;
                 x1 = x2;
-                x2 = p;
-                p = y1;
+                x2 = temp;
+                temp = y1;
                 y1 = y2;
-                y2 = p;
+                y2 = temp;
             }
         }
 
-        x = x1;
-        y = y1;
+        float x = x1;
+        float y = y1;
         int max = Math.max(Math.abs(dx), Math.abs(dy));
-        for (int l = 0; l <= max ; l++) {
 
-            drawPixel(Math.round(x),Math.round(y),Color.RED.getRGB());
-            x += G;
-            y += H;
+        for (int i = 0; i <= max; i++) {
+            drawPixel(Math.round(x), Math.round(y),color);
+            x += g;
+            y += h;
         }
-
-
     }
 
-    public void polygon(int x1, int y1, int x2, int y2, int count){
+    public void polygon(int x1, int y1, int x2, int y2, int count) {
         double x0 = x2 - x1;
         double y0 = y2 - y1;
-        double circleRaridus = 2 * Math.PI;
-        double step = circleRaridus / (double) count;
-
-
-        for (double i = 0; i < circleRaridus ; i += step) {
-            //dle rotacni matice
+        double circleRadius = 2 * Math.PI;
+        double step = circleRadius / (double) count;
+        for (double i = 0; i < circleRadius; i += step) {
+            // dle rotační matice
             double x = x0 * Math.cos(step) + y0 * Math.sin(step);
             double y = y0 * Math.cos(step) - x0 * Math.sin(step);
-            lineDDA((int)x0 + x1,(int)y0 + y1 , (int)x + x1, (int)y + y1 );
-
-            // potreba zmenit x0, y0
-            x0 = x;
-            y0 = y;
-
-
-
+            lineDDA((int) x0 + x1, (int) y0 + y1,
+                    (int) x + x1, (int) y + y1, color);
+            // potřeba změnit x0, y0
         }
+    }
+
+    public void seedFill(int x, int y, int oldColor, int newColor) {
+        if (oldColor == img.getRGB(x, y)) {
+            drawPixel(x, y, newColor);
+
+            seedFill(x - 1, y, oldColor, newColor);
+            seedFill(x + 1, y, oldColor, newColor);
+            seedFill(x, y + 1, oldColor, newColor);
+            seedFill(x, y - 1, oldColor, newColor);
+        }
+
+    }
+    public void scanLine(List<Point> points, int borderColor, int fillColor){
+
+        int yMax = 0;
+        int yMin = img.getHeight();
+        List<Edge>edges = new ArrayList<>();
+
+        for (int i = 0; i < points.size(); i++) {
+            //vytváření useček
+            //volání určitých metod
+            //hledání hraničních
+            //přidání Edge do seznamu Edges
+        }
+        /*
+         * TODO:
+         *  1) připravit yMax a yMin -->DONE
+         *  2) definice seznamu useček
+         *   - seřadit dle y1<y2
+         *   - vypočítat koeficienty k a q
+         *   - oříznout poslední pixel
+         *   3) for cykl od yMin do yMax
+         *   - pro každé y hledáme prusecik s useckami
+         *   - pro sudý počet prisečíku seřadit dle x
+         *   4)
+         *
+         * */
+
+
     }
 }

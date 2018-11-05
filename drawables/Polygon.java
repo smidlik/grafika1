@@ -1,36 +1,58 @@
 package drawables;
 
-import utils.Renderer;
-
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import utils.Renderer;
+
 public class Polygon implements Drawable {
-    
 
-    private int x1,y1,x2,y2,count;
+    List<Point> points;
+    private boolean done;
 
-
-    public Polygon(int count, Point point1, Point point2) {
-        this.count = count;
-        x1=point1.getX();
-        y1=point1.getY();
-        x2=point2.getX();
-        y2=point2.getY();
+    public Polygon() {
+        points = new ArrayList<>();
     }
 
-    public Polygon(int x1, int y1, int x2, int y2, int count) {
-     this.x1 = x1;
-     this.y1 = y1;
-     this.x2 = x2;
-     this.y2 = y2;
-     this.count = count;
+    public void addPoint(Point p) {
+        points.add(p);
     }
-
-
 
     @Override
     public void draw(Renderer renderer) {
-        renderer.polygon(x1,y1,x2,y2,count);
+        if(!done) {
+            if (points.size() > 1) {
+                for (int i = 0; i < points.size(); i++) {
+                    Point point1 = points.get(i);
+                    Point point2 = points.get((i + 1) % points.size());
+                    renderer.lineDDA(point1.getX(), point1.getY(),
+                            point2.getX(), point2.getY(), getColor());
+                }
+            }
+        }
+        else {
+            renderer.scanLine(points, getColor(),getFillColor());
+        }
+    }
+
+    @Override
+    public void modifyLastPoint(int x, int y) {
+        // ignored
+    }
+
+    @Override
+    public int getFillColor() {
+        return Color.YELLOW.getRGB();
+    }
+
+    @Override
+    public int getColor() {
+        return Color.BLUE.getRGB();
+
+    }
+
+    public void setDone(boolean done) {
+        this.done = done;
     }
 }
