@@ -20,8 +20,8 @@ import javax.swing.WindowConstants;
 import drawables.Drawable;
 import drawables.DrawableType;
 import drawables.Line;
-import drawables.Point;
 import drawables.Polygon;
+import transforms.Point2D;
 import utils.Renderer;
 
 public class PgrfFrame extends JFrame implements MouseMotionListener {
@@ -83,7 +83,7 @@ public class PgrfFrame extends JFrame implements MouseMotionListener {
                         }
                         if (drawable instanceof Polygon){
                             ((Polygon) drawable).addPoint(
-                                    new Point(e.getX(), e.getY()));
+                                    new Point2D(e.getX(), e.getY()));
                         } else {
                             drawable = null;
                         }

@@ -2,6 +2,7 @@ package ui;
 
 import drawables.*;
 import drawables.Polygon;
+import solids.Cube;
 import solids.Solid;
 import transforms.Camera;
 import utils.Transforms;
@@ -41,6 +42,7 @@ public class PgrfWireFrame extends JFrame {
 
         img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
+
         camera = new Camera();
         solids = new ArrayList<>();
         panel = new JPanel();
@@ -48,6 +50,10 @@ public class PgrfWireFrame extends JFrame {
 
         setLocationRelativeTo(null);
         transformer = new Transforms(img);
+
+
+        solids.add(new Cube(100));
+
 
         panel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
@@ -74,7 +80,6 @@ public class PgrfWireFrame extends JFrame {
 
     private void draw() {
         img.getGraphics().fillRect(0,0,img.getWidth(),img.getHeight());
-
 
         panel.getGraphics().drawImage(img, 0,0,img.getWidth(), img.getHeight(), null); // zde ji to vykresli
         panel.paintComponents(getGraphics());

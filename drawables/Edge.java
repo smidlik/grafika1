@@ -1,28 +1,41 @@
 package drawables;
 
+import transforms.*;
+
 public class Edge {
 
-    int x1,x2,y1,y2;
+    double x1,x2,y1,y2;
     float k,q;
 
-    public Edge(Point p1, Point p2){
+    public Edge(Point2D p1, Point2D p2){
         this.x1 = p1.getX();
         this.x2 = p2.getX();
         this.y1 = p1.getY();
         this.y2 = p2.getY();
     }
 
+
     public boolean isHorizontal(){
-        return false; //TODO vrátí tru když je horizontalní
+        if (y1 == y2)return true;
+        else return false;
+
+        //TODO vrátí tru když je horizontalní // DONE
     }
 
     public void order(){
         //TODO seradit dle y1<y2
+        if(y2<y1){
+            double temp = y1;
+            y1 = y2;
+            y2 = temp;
+
+        }
 
     }
 
     public void cut(){
         //TODO ořiznout poslední pixel
+
     }
 
     public void compute(){
@@ -38,9 +51,13 @@ public class Edge {
     }
 
     public int yMin(int yMin){
-        return 0; // TODO vrátí nejmenší z yMin, Y2, Y1
+        if(y1<y2&&y1<yMin)return (int) y1;
+        if(y2<y1&&y2<yMin)return (int) y2;
+        return yMin;
     }
     public  int yMax(int yMax){
-        return 0; //TODO vrátí nejvetší z yMax, y1, y2
+        if(y1>y2&&y1>yMax)return (int) y1;
+        if(y2>y1&&y2>yMax)return (int) y2;
+        return yMax;
     }
 }

@@ -1,7 +1,7 @@
 package utils;
 
 import drawables.Edge;
-import drawables.Point;
+import transforms.Point2D;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -18,6 +18,15 @@ public class Renderer {
         color = Color.RED.getRGB();
     }
 
+    //DRAW PIXEL
+    private void drawPixel(Point2D point2D, int color) {
+        drawPixel((int) point2D.getX(), (int) point2D.getY(), color);
+    }
+
+    private void drawPixel(Point2D point2D) {
+        drawPixel((int) point2D.getX(), (int) point2D.getY(), color);
+    }
+
     private void drawPixel(int x, int y) {
         drawPixel(x, y, color);
     }
@@ -28,33 +37,35 @@ public class Renderer {
         img.setRGB(x, y, color);
     }
 
+    ////////////////////////
+    //////////LINE TRIVIAL///////
     public void lineTrivial(int x1, int y1, int x2, int y2) {
-        // y = kx + q
-        int dx = x1 - x2;
-        int dy = y1 - y2;
-
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+        drawPixel(x1, y1);
         if (Math.abs(dx) > Math.abs(dy)) {
-            // řídící osa X
-            // otočení
-            if (x1 > x2) {
-                int p = x1;
-                x1 = x2;
-                x2 = p;
-                p = y1;
-                y1 = y2;
-                //y2 = p;
-            }
-
             float k = (float) dy / (float) dx;
-            for (int x = x1; x < x2; x++) {
-                int y = y1 + (int) (k * (x - x1));
-                drawPixel(x, y);
+            float q = y1 - k * x1;
+            if (dx < 0) dx = -1;
+            else dx = 1;
+            while (x1 != x2) {
+                x1 += dx;
+
+                drawPixel(x1, Math.round(k * x1 + q));
             }
-
-        } else {
-            // řídící osa Y
-
+        } else if (dy != 0) {
+            float m = (float) dx / (float) dy;
+            float b = x1 - m * y1;
+            if (dy < 0) dy = -1;
+            else dy = 1;
+            while (y1 != y2) {
+                y1 += dy;
+                drawPixel(Math.round(m * y1 + b), y1);
+            }
         }
+    }
+    public  void lineDDA(Point2D p1,Point2D p2, int color){
+        lineDDA((int)p1.getX(),(int)p1.getY(),(int)p2.getX(),(int)p2.getY(),color);
     }
 
     public void lineDDA(int x1, int y1, int x2, int y2, int color) {
@@ -94,10 +105,49 @@ public class Renderer {
         int max = Math.max(Math.abs(dx), Math.abs(dy));
 
         for (int i = 0; i <= max; i++) {
-            drawPixel(Math.round(x), Math.round(y),color);
+            drawPixel(Math.round(x), Math.round(y), color);
             x += g;
             y += h;
         }
+    }
+
+    public void lineBresenham(int x1, int y1, int x2, int y2, int color) {
+        float x, y, k1, k2, p; //G = PŘÍRŮSTEK X, H = PŘÍRŮSTEK Y
+        int dy = y2 - y1;
+        int dx = x2 - x1;
+        x = x1;
+        y = y1;
+        p = 2 * dy - dx;
+        k1 = 2 * dy;
+        k2 = 2 * (dy - dx);
+        if (Math.abs(dy) < Math.abs(dx)) {
+            if (x2 < x1) {
+                int temp = x1;
+                x1 = x2;
+                x2 = temp;
+                temp = y1;
+                y1 = y2;
+                y2 = temp;
+                y = x1;
+            }
+            if (y2 < y1) {
+                int temp = x1;
+                x1 = x2;
+                x2 = temp;
+                temp = y1;
+                y1 = y2;
+                y2 = temp;
+                x = y1;
+            }
+        }
+        while (x < x2) {
+            x = x + 1;
+            if (p < 0) p += k1;
+            else p += k2;
+            y += 1;
+            drawPixel((int) x, (int) y, color);
+        }
+
     }
 
     public void polygon(int x1, int y1, int x2, int y2, int count) {
@@ -126,14 +176,15 @@ public class Renderer {
         }
 
     }
-    public void scanLine(List<Point> points, int borderColor, int fillColor){
+
+    public void scanLine(List<Point2D> points, int borderColor, int fillColor) {
 
         int yMax = 0;
         int yMin = img.getHeight();
-        List<Edge>edges = new ArrayList<>();
+        List<Edge> edges = new ArrayList<>();
 
         for (int i = 0; i < points.size(); i++) {
-            //vytváření useček
+            //vytváření usečekf
             //volání určitých metod
             //hledání hraničních
             //přidání Edge do seznamu Edges

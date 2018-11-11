@@ -37,6 +37,7 @@ public class Transforms {
     private void transformEdge(Mat4 mat4, Point3D p1,Point3D p2){
         //todo:
         //1) Vynásobit body maticí
+
         //2) ořez dle W z bodu
         //3) tvorba vektoru dehomogenizací
         //4) přepočet souřadnic na výšku/šířku okna (viewport)
